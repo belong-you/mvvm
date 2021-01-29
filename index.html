@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="app">
+        hello, {{ content }} {{hei }}
+        <span>{{ text }}</span>
+        {{ content }}
+        <br>
+        <p>fdsfsadfsdjljl</p>
+    </div>
+
+    <script type='module'>
+        import Due from './core/index.js';
+
+        window.due = new Due({
+            el: 'app',
+            data: {
+                content: 'world',
+                text: 'ccccccccccccc',
+                obj: {
+                    x: 10,
+                    y: 10,
+                },
+                arr1: [1, 2],
+                arr2: [
+                    {
+                        age: 18
+                    }
+                ]
+            }
+        });
+    </script>
+</body>
+</html>
