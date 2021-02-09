@@ -16,10 +16,15 @@ export function prepareRender (vm, vnode) {
 
     if (vnode.nodeType == 3) {  // 文本节点
         analysisTemplateString(vnode);
-    } else if (vnode.nodeType == 1) {  // 标签节点  
-        for (let i = 0; i < vnode.children.length; i ++) {
-            prepareRender(vm, vnode.children[i]);
-        }
+    }
+    if (vnode.nodeType == 0) {  // 虚拟节点
+        setTemplate2Vnode(vnode.data, vnode);
+        setVnode2Template(vnode.data, vnode);
+    }
+
+    analysisAttr(vm, vnode);  // 带属性标签的
+    for (let i = 0; i < vnode.children.length; i ++) {
+        prepareRender(vm, vnode.children[i]);
     }
 }
 
@@ -58,6 +63,18 @@ export function renderNode (vm, vnode) {
             }
             vnode.elm.nodeValue = result;
         }
+    } else if (vnode.nodeType == 1 && vnode.tag == 'INPUT') {
+        // 设置 input.value，双向数据绑定
+        let templates = vnode2Template.get(vnode);
+        // console.log(templates)
+        if (templates) {
+            for (let i = 0; i < templates.length; i ++) {
+                let templateValue = getTemplateValue([vm._data, vnode.env], templates[i]);
+                if (templateValue) {
+                    vnode.elm.value = templateValue;
+                }
+            }
+        }
     } else {
         for (let i = 0; i < vnode.children.length; i ++) {
             renderNode(vm, vnode.children[i]);
@@ -66,10 +83,11 @@ export function renderNode (vm, vnode) {
 }
 
 /**
- * 渲染数据，监听数据变化，查找映射的节点，只重新挂载该节点
+ * 渲染数据，监听数据变化，查找映射的节点，只对该节点重新挂载
  */
 export function renderData (vm, data) {
     let vnodes = template2Vnode.get(data);
+    // console.log(data)
     if (vnodes != null) {
         for (let i = 0; i < vnodes.length; i ++) {
             renderNode(vm, vnodes[i]);
@@ -79,7 +97,7 @@ export function renderData (vm, data) {
 
 // 分析模板字符串，设置 Map 对象
 function analysisTemplateString (vnode) {
-    let templetaStringList = vnode.text.match(/{{[a-zA-Z0-9._\s]+}}/g);
+    let templetaStringList = vnode.text.match(/{{[a-zA-Z0-9._\[\]\s]+}}/g);
     for (let i = 0; templetaStringList && i < templetaStringList.length; i ++) {
         // 设置模板、节点 Map 对象，形成映射
         setTemplate2Vnode(templetaStringList[i], vnode);
@@ -128,4 +146,23 @@ function getTemplateValue (objs, templateName) {
         }
     }
     return null;
+}
+
+function analysisAttr (vm, vnode) {
+    if (vnode.nodeType != 1) return;
+    let attrNames = vnode.elm.getAttributeNames();
+    if (attrNames.indexOf('v-model') > -1) {
+        setTemplate2Vnode(vnode.elm.getAttribute('v-model'), vnode);
+        setVnode2Template(vnode.elm.getAttribute('v-model'), vnode);
+    }
+}
+
+
+export function getVnodeByTemplate (vnode) {
+    return template2Vnode.get(vnode);
+}
+
+export function clearMap () {
+    template2Vnode.clear();
+    vnode2Template.clear();
 }

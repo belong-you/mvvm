@@ -1,3 +1,4 @@
+import { rebuild } from "./mount.js";
 import { renderData } from "./render.js";
 
 const arrayProto = Array.prototype;
@@ -9,7 +10,8 @@ function defArrayFunc (obj, func, namespace, vm) {
             let original = arrayProto[func];
             const result = original.apply(this, args);
             // console.log(getNameSpace(namespace, ''));
-            renderData(vm, getNameSpace(namespace, prop));
+            rebuild(vm, getNameSpace(namespace, ''));
+            renderData(vm, getNameSpace(namespace, ''));
             return result;
         }
     })
@@ -79,8 +81,10 @@ export function constructProxy (vm, obj, namespace) {
 function constructObjectProxy (vm, obj, namespace) {
     let proxyObj = {};
 
+    // console.log(obj)
     // 遍历该对象，对每个 key 值添加 get 和 set 方法
     for (const prop in obj) {
+        // console.log(obj[prop])
         Object.defineProperty(proxyObj, prop, {  // Object 身上的方法，属性描述符
             configurable: true,
             get () {
@@ -127,6 +131,6 @@ function getNameSpace (nowNameSpace, nowProp) {
     } else if (nowProp == null || nowProp == '') {
         return nowNameSpace;
     } else {
-        return nowProp + '.' + nowNameSpace;
+        return nowNameSpace + '.' + nowProp;
     }
 }

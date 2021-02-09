@@ -39,3 +39,10 @@ Object.defineProperty(vm, prop, {
 
 1. 在 Object.defineProperty 改变属性值时，执行 “初始化渲染 3.” （只对数据改变的节点进行重新挂载）
 
+## 双向数据绑定 v-model
+
+1. 拿到 input 框 v-model 所绑定的属性值，在失去焦点时重新设置该对象 value；
+2. 在挂载节点时监控带有 v-model 属性的 input 框，将其 value 重新设置。
+
+## v-for
+
